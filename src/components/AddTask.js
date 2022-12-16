@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 
-const AddTask = () => {
+const AddTask = ({ tasks, setTasks }) => {
   const [task, setTask] = useState("");
 
   const inputRef = useRef(null);
@@ -18,7 +18,7 @@ const AddTask = () => {
   // task posting
   const taskPosting = async (text) => {
     const res = await fetch(
-      "https://aluminum-delicate-snowshoe.glitch.me/tasks",
+      "https://flax-diagnostic-notebook.glitch.me/tasks",
       {
         method: "POST",
         headers: {
@@ -27,6 +27,8 @@ const AddTask = () => {
         body: JSON.stringify({ text }),
       }
     );
+    const data = await res.json();
+    setTasks([...tasks, data]);
   };
 
   return (
