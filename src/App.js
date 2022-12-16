@@ -1,11 +1,16 @@
-import { useEffect, useState } from "react";
+import { createContext, useEffect, useState } from "react";
 import AddTask from "./components/AddTask";
 import Footer from "./components/Footer";
 import Header from "./components/Header";
 import TaskList from "./components/TaskList";
 
+export const DeleteHandlerContext = createContext();
+
 const App = () => {
   const [tasks, setTasks] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
   useEffect(() => {
     //getting data from the server
     fetchingData();
@@ -20,17 +25,44 @@ const App = () => {
       if (!res.ok) throw new Error("Somthing went wrong");
       const data = await res.json();
       setTasks(data);
+      setLoading(false);
     } catch (error) {
-      console.log(error.message);
+      setError(error.message);
     }
+  };
+
+  //delete event
+  const handleDelete = (id) => {
+    // delete data
+    deleteData(id);
+    //set updated task
+    setTasks(tasks.filter((task) => id !== task.id));
+  };
+
+  const deleteData = async (id) => {
+    await fetch(`https://flax-diagnostic-notebook.glitch.me/tasks/${id}`, {
+      method: "DELETE",
+      headers: {
+        "Content-type": "application/json",
+      },
+    });
+  };
+
+  //editing event
+  const handleEdit = (id) => {
+    //set a target element
+    //set a editable prop
+    //set edited text
   };
 
   return (
     <div className="wrapper bg-gradient-to-t from-gray-900 to-teal-900 min-h-screen text-xl text-gray-100 flex flex-col py-10">
-      <Header />
-      <AddTask tasks={tasks} setTasks={setTasks} />
-      <TaskList tasks={tasks} />
-      <Footer />
+      <DeleteHandlerContext.Provider value={handleDelete}>
+        <Header />
+        <AddTask tasks={tasks} setTasks={setTasks} />
+        <TaskList tasks={tasks} error={error} loading={loading} />
+        <Footer />
+      </DeleteHandlerContext.Provider>
     </div>
   );
 };
